@@ -11,15 +11,21 @@ html
         font-family: 'pridi'
         src: url('/assets/font/pridi.ttf') format('truetype')
 
+      @font-face
+        font-family: 'pacifico'
+        src: url('/assets/font/pacifico.ttf') format('truetype')
+
   body
     .p-4.h-100
       .d-flex.flex-column.h-100
         .mb-2: textarea.form-control(ld="edit",rows="5")
           | Hello
           | World!
-        .flex-grow-1
+        .flex-grow-1.position-relative
           svg.w-100.h-100.border(ld="svg")
-              
+          .position-absolute(ld="content",contenteditable,
+          style="caret-color:#000;color:rgba(0,0,0,0);font-size:64px;font-family:pacifico;top:200px;left:200px") Hello
+
     +script("/assets/lib/ldui/ldui.min.js")
     +script("/assets/lib/opentype.js/opentype.min.js")
     +script("/assets/lib/tts/ol.bundle.min.js")
@@ -36,10 +42,31 @@ html
           .then (paths) ->
             paths.map (d,i) ->
               d.setAttribute \fill, colors[i % colors.length]
-            
+
+        cnode = view.get(\content)
+        style = window.getComputedStyle(cnode)
+        opt = do
+          font: 'pacifico'
+          fontSize: +style.fontSize.replace(/[^0-9]+/g,'')
+          lineHeight: +style.lineHeight.replace(/[^0-9]+/g,'')/+style.fontSize.replace(/[^0-9]+/g,'')
+          width: style.width.replace(/[^0-9]+/g,'')
+
+        tts(cnode.innerText, opt)
+          .then (paths) ->
+            g = ld$.create ns: \svg, name: \g
+            box = cnode.getBoundingClientRect!
+            rbox = svg.getBoundingClientRect!
+            [x,y] = [box.x - rbox.x, box.y - rbox.y]
+            g.setAttribute \transform, "translate(#x, #y)"
+            svg.appendChild g
+            paths.map (d,i) ->
+              g.appendChild d
+              d.setAttribute \fill, colors[i % colors.length]
+
       view = new ldView do
         root: document.body
         action: input: do
           edit: ({node, evt}) -> update!
+          content: ({node, evt}) -> update!
 
       update!
