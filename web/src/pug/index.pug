@@ -6,43 +6,54 @@ html
     +css("/assets/lib/ldui/ldui.min.css")
     style(type="text/css"): :stylus
       html,body { width: 100%; height: 100%; margin: 0; padding: 0 }
+
+      @font-face
+        font-family: 'pridi'
+        src: url('/assets/font/pridi.ttf') format('truetype')
+
   body
     .p-4.h-100
       .d-flex.flex-column.h-100
         .mb-2: textarea.form-control(ld="edit",rows="5")
-        .flex-grow-1:  svg.w-100.h-100.border(ld="svg")
+        .flex-grow-1
+          svg.w-100.h-100.border(ld="svg")
+            //-text(dominant-baseline="hanging",font-size="32",font-family="pridi")
+              | hello
+              | world
+              
     +script("/assets/lib/ldui/ldui.min.js")
-    +script("/assets/lib/tts/tts.bundle.min.js")
+    +script("/assets/lib/opentype.js/opentype.min.js")
+    //-+script("/assets/lib/tts/tts.bundle.min.js")
     +script("/assets/lib/tts/ol.bundle.min.js")
     script: :lsc
-      text-to-svg = require("text-to-svg")
       opentype-layout = require("opentype-layout")
-      console.log opentype-layout
-      text-to-svg.load "/assets/font/pridi.ttf", (e, tts) ->
-        console.log tts.font
-        scale = 1 / tts.font.unitsPerEm * 64
-        result = opentype-layout tts.font, "ok\nhow are you", {
-          lineHeight: 2.5 * tts.font.unitsPerEm
-          width: 500 / scale
-        }
-        console.log result
+      tts = (text, opt) ->
+        opt = { fontSize: 16, lineHeight: 1.5, width: 500 } <<< opt
+        promise = if tts.{}font[opt.font] =>
+          Promise.resolve(tts.{}font[opt.font])
+        else new Promise (res, rej) ->
+          opentype.load "/assets/font/#{opt.font}.ttf", (e, font) -> res(tts.font[opt.font] = font)
+        promise.then (font) ->
+          scale = opt.fontSize / font.unitsPerEm
+          layout = opentype-layout font, text, {
+            lineHeight: opt.lineHeight * font.unitsPerEm
+            width: opt.width / scale
+          }
+          paths = []
+          color = <[#f00 #f90 #ff0 #9f0 #0f0 #0f9 #0ff #09f #00f #90f #f0f #f09]>
 
-
-        view = new ldView do
-          root: document.body
-          action: input: do
-            edit: ({node, evt}) ->
-              svg = view.get(\svg)
-              for i from Array.from(svg.childNodes).length - 1 to 0 by -1 =>
-                svg.removeChild svg.childNodes[i]
-              ret = tts.getD(view.get(\edit).value)
-              path = ld$.create ns: \svg, name: \path
-              path.setAttribute \d, ret
-              svg.appendChild path
-              box = path.getBoundingClientRect!
-              [x,y] = [box.width, box.height]
-              path.setAttribute \transform, "translate(0, #y)"
-
-      
-
+          for i from 0 til layout.glyphs.length =>
+            g = layout.glyphs[i]
+            d = g.data.path.toPathData!
+            p = document.createElementNS("http://www.w3.org/2000/svg", "path")
+            p.setAttribute \d, d
+            pos = g.position
+            p.setAttribute \transform, "scale(#{scale},-#{scale}) translate(#{pos.0},#{pos.1})"
+            p.setAttribute \fill, color[i]
+            paths.push p
+            if opt.container => that.appendChild p
+          return paths
+      svg = ld$.find '[ld=svg]', 0
+      tts("hello\nworld", {container: svg, font: 'pacifico', fontSize: 32, lineHeight: 1})
+        .then -> console.log it
 

@@ -2,10 +2,10 @@
 
 mkdir -p dist
 echo "bundle text-to-svg to dist/tts.bundle.js ... "
-./node_modules/browserify -p tinyify -r text-to-svg > dist/tts.bundle.js
+./node_modules/.bin/browserify -u opentype.js -p tinyify -r text-to-svg > dist/tts.bundle.js
 
 echo "bundle opentype-layout to dist/ol.bundle.js ... "
-./node_modules/browserify -p tinyify -r opentype-layout > dist/ol.bundle.js
+./node_modules/.bin/browserify -p tinyify -r opentype-layout > dist/ol.bundle.js
 
 echo "uglify dist/tts.bundle.js to dist/tts.bundle.min.js"
 ./node_modules/.bin/uglifyjs dist/tts.bundle.js > dist/tts.bundle.min.js
