@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+mkdir -p dist
+echo "bundle text-to-svg to dist/tts.bundle.js ... "
+./node_modules/browserify -p tinyify -r text-to-svg > dist/tts.bundle.js
+
+echo "bundle opentype-layout to dist/ol.bundle.js ... "
+./node_modules/browserify -p tinyify -r opentype-layout > dist/ol.bundle.js
+
+echo "uglify dist/tts.bundle.js to dist/tts.bundle.min.js"
+./node_modules/.bin/uglifyjs dist/tts.bundle.js > dist/tts.bundle.min.js
+
+echo "uglify dist/ol.bundle.js to dist/ol.bundle.min.js"
+./node_modules/.bin/uglifyjs dist/ol.bundle.js > dist/ol.bundle.min.js
+
+echo "deploy into local web ..."
+mkdir -p web/static/assets/lib/tts/
+cp -R dist/* web/static/assets/lib/tts/
+
+echo "done."

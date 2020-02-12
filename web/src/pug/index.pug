@@ -1,0 +1,48 @@
+doctype html
+html
+  include /../../static/assets/lib/ldui/pug/ldui.pug
+  head
+    +css("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css")
+    +css("/assets/lib/ldui/ldui.min.css")
+    style(type="text/css"): :stylus
+      html,body { width: 100%; height: 100%; margin: 0; padding: 0 }
+  body
+    .p-4.h-100
+      .d-flex.flex-column.h-100
+        .mb-2: textarea.form-control(ld="edit",rows="5")
+        .flex-grow-1:  svg.w-100.h-100.border(ld="svg")
+    +script("/assets/lib/ldui/ldui.min.js")
+    +script("/assets/lib/tts/tts.bundle.min.js")
+    +script("/assets/lib/tts/ol.bundle.min.js")
+    script: :lsc
+      text-to-svg = require("text-to-svg")
+      opentype-layout = require("opentype-layout")
+      console.log opentype-layout
+      text-to-svg.load "/assets/font/pridi.ttf", (e, tts) ->
+        console.log tts.font
+        scale = 1 / tts.font.unitsPerEm * 64
+        result = opentype-layout tts.font, "ok\nhow are you", {
+          lineHeight: 2.5 * tts.font.unitsPerEm
+          width: 500 / scale
+        }
+        console.log result
+
+
+        view = new ldView do
+          root: document.body
+          action: input: do
+            edit: ({node, evt}) ->
+              svg = view.get(\svg)
+              for i from Array.from(svg.childNodes).length - 1 to 0 by -1 =>
+                svg.removeChild svg.childNodes[i]
+              ret = tts.getD(view.get(\edit).value)
+              path = ld$.create ns: \svg, name: \path
+              path.setAttribute \d, ret
+              svg.appendChild path
+              box = path.getBoundingClientRect!
+              [x,y] = [box.width, box.height]
+              path.setAttribute \transform, "translate(0, #y)"
+
+      
+
+
