@@ -29,6 +29,8 @@ Yet, we might want to derive a direct lib from multi-line text to svg that are h
  * Merge / Minimize code - combine text-to-svg and opentype-layout to provide our own version of text-to-svg.
    - seems opentype-layout already does a good job, and we don't need text-to-svg. (TBD)
 
+ * fallback fonts
+   - cjk characters won't be rendered correctly if chosen font doesn't support them. should we add fallback mechanism and load default fonts if need? (TBD)
 
 ## LICENSE
 
