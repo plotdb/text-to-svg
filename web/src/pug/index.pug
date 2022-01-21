@@ -16,6 +16,10 @@ html
         font-family: 'pacifico'
         src: url('/assets/font/pacifico.ttf') format('truetype')
 
+      @font-face
+        font-family: 'sueellenfrancisco'
+        src: url('/assets/font/sueellenfrancisco.ttf') format('truetype')
+
   body
     .p-4.h-100
       .d-flex.flex-column.h-100
@@ -36,6 +40,7 @@ html
     +script("/js/tts.js")
     script: :lsc
 
+      font = 'sueellenfrancisco'
       svg = ld$.find '[ld=svg]', 0
       svg2 = ld$.find '[ld=svg2]', 0
       colors = <[#f00 #f90 #ff0 #9f0 #0f0 #0f9 #0ff #09f #00f #90f #f0f #f09]>
@@ -43,7 +48,7 @@ html
       update = ->
         for i from Array.from(svg.childNodes).length - 1 to 0 by -1 =>
           svg.removeChild svg.childNodes[i]
-        tts(view.get(\edit).value, {container: svg, font: 'pacifico', fontSize: 32, lineHeight: 1})
+        tts(view.get(\edit).value, {container: svg, font: font, fontSize: 32, lineHeight: 1})
           .then (paths) ->
             paths.map (d,i) ->
               d.setAttribute \fill, colors[i % colors.length]
@@ -51,7 +56,7 @@ html
         cnode = view.get(\content)
         style = window.getComputedStyle(cnode)
         opt = do
-          font: 'pacifico'
+          font: font
           fontSize: +style.fontSize.replace(/[^0-9]+/g,'')
           lineHeight: +style.lineHeight.replace(/[^0-9]+/g,'')/+style.fontSize.replace(/[^0-9]+/g,'')
           width: style.width.replace(/[^0-9]+/g,'')
