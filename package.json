@@ -1,6 +1,6 @@
 {
   "author": "zbryikt",
-  "name": "text-ot-svg",
+  "name": "text-to-svg",
   "license": "MIT",
   "description": "convert text to svg path",
   "version": "0.0.1",
